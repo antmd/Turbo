@@ -15,6 +15,14 @@
 
 namespace mpl
 {
+    template<bool BREAK_CONDITION>
+    struct loop_kernel
+    {
+        static const bool abort = BREAK_CONDITION;
+    };
+    
+    using no_abort_kernel = mpl::loop_kernel<false>;
+    
     namespace 
     {
         template<bool FLAG , typename A , typename B>
@@ -35,8 +43,30 @@ namespace mpl
             struct _for_loop
             {
                 using kernel_result = typename KERNEL<typename CURRENT::value , PREVIOUS_RESULT>::result;
-                using next = _for_loop<mpl::next<CURRENT> , _END , kernel_result,mpl::equal<mpl::next<CURRENT>,_END>::value>;
-                using result = typename next::result;
+                static const bool abort = KERNEL<typename CURRENT::value , PREVIOUS_RESULT>::abort;
+                
+                //static_assert( !abort , "LOOP ABORTED!" );
+                
+                /* lazy evaluation */
+                
+                template<bool LOOP_ABORTED , typename NON_GLOBAL_SPECIALIZATION_WORKAROUND = mpl::no_type>
+                struct loop_result;
+                
+                template<typename WAROUND>
+                struct loop_result<true , WAROUND>
+                {
+                    using result = kernel_result;
+                };
+                
+                template<typename WAROUND>
+                struct loop_result<false , WAROUND>
+                {
+                    using next = _for_loop<mpl::next<CURRENT> , _END , kernel_result,mpl::equal<mpl::next<CURRENT>,_END>::value>;
+                    using result = typename next::result;
+                };
+                
+              
+                using result = typename loop_result<abort>::result;
             };
 
             template<typename CURRENT , typename _END , typename PREVIOUS_RESULT>
@@ -48,8 +78,6 @@ namespace mpl
         public:
             using result = typename _for_loop<BEGIN,END,START_RESULT,mpl::equal<BEGIN,END>::value>::result;
         };
-
-        
         
         template<typename BEGIN , typename END , template<typename> class KERNEL , template<typename> class FILTER>
         class __for_each

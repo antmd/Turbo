@@ -68,6 +68,12 @@ namespace math
     
     /* vectors length */
     
+    template<typename VECTOR>
+    struct length_t;
+    
+    template<typename VECTOR>
+    using length = typename math::length_t<VECTOR>::result;
+    
     template<typename X , typename Y>
     struct length_t<math::vec2<X,Y>> : public mpl::function<math::sqrt<decltype( X() * X() + Y() * Y() )>> {};
     
@@ -76,9 +82,6 @@ namespace math
     
     template<typename X , typename Y , typename Z , typename W>
     struct length_t<math::vec4<X,Y,Z,W>> : public mpl::function<math::sqrt<decltype( X() * X() + Y() * Y() + Z() * Z() + W() * W() )>> {};
-    
-    template<typename VECTOR>
-    using length = typename length_t<VECTOR>::result;
     
     template<typename VECTOR>
     using normalize = mpl::div<VECTOR,math::length<VECTOR>>;

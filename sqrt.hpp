@@ -36,7 +36,7 @@ namespace math
 {
     
 #ifndef TURBO_CUSTOM_SQRT_DEFAULT_ITERATIONS
-    using default_sqrt_newton_iterations = mpl::uinteger<10>;
+    using default_sqrt_newton_iterations = mpl::uinteger<1000>;
 #else
     using default_sqrt_newton_iterations = mpl::uinteger<TURBO_CUSTOM_SQRT_DEFAULT_ITERATIONS>;
 #endif
@@ -48,13 +48,19 @@ namespace math
          * For loop kernel: CURRENT (The value of the loop counter) is not used. The previous value holds Xn.
          */
         template<typename CURRENT , typename PREVIOUS>                                //2*Xn was rewritten as Xn + Xn due to a lack of the library...
-        struct newton_iter_kernel : public mpl::function<decltype( PREVIOUS() - ((mpl::square<PREVIOUS>() - N() ) / (PREVIOUS() + PREVIOUS())) )> {};
+        struct newton_iter_kernel 
+        {
+            using result = decltype( PREVIOUS() - ((mpl::square<PREVIOUS>() - N() ) / (PREVIOUS() + PREVIOUS())) );
+            static const bool abort = mpl::equal<PREVIOUS , result>::value; //When the function converges, the loop is aborted
+        };
         
         using begin = mpl::make_uinteger_forward_iterator<1>;
         using end   = mpl::make_uinteger_forward_iterator<ITERATIONS::value>;
         using guess = mpl::one<N>;
         
-        using result = mpl::for_loop<begin,end,guess,newton_iter_kernel>;
+        //Apaño ( resultado - 1)
+        using result = decltype(mpl::for_loop<begin,end,guess,newton_iter_kernel>() - mpl::decimal<0>());
+        
     };
     
     template<typename N , typename ITERATIONS = math::default_sqrt_newton_iterations>
