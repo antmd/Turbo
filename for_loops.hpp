@@ -115,6 +115,25 @@ namespace mpl
         public:
             using result = typename _for_each<BEGIN,false>::result;
         };
+        
+        
+        /* Optimized for_each version: */
+        
+        template<typename LIST , template<typename> class KERNEL , template<typename> class FILTER>
+        struct __for_each_in_list;
+        
+        //O(n)
+        template<typename... Ts , template<typename> class KERNEL , template<typename> class FILTER>
+        struct __for_each_in_list<mpl::list<Ts...> , KERNEL , FILTER> : public __for_each<mpl::begin<mpl::list<Ts...>> , mpl::end<mpl::list<Ts...>> , KERNEL , FILTER> {};
+        
+        //O(1)
+        template<typename... Ts , template<typename> class KERNEL>
+        struct __for_each_in_list<mpl::list<Ts...> , KERNEL , mpl::true_predicate> : public mpl::function<mpl::list<typename KERNEL<Ts>::result...>> {};
+        
+        //O(1)
+        template<typename... Ts , template<typename> class KERNEL>
+        struct __for_each_in_list<mpl::list<Ts...> , KERNEL , mpl::false_predicate> : public mpl::function<mpl::empty_list> {};
+        
     }
     
     template<typename CONDITION , typename A , typename B>
@@ -125,5 +144,8 @@ namespace mpl
     
     template<typename BEGIN , typename END , template<typename> class KERNEL , template<typename> class FILTER = mpl::true_predicate>
     using for_each = typename __for_each<BEGIN,END,KERNEL,FILTER>::result;
+    
+    template<typename LIST , template<typename> class KERNEL , template<typename> class FILTER = mpl::true_predicate>
+    using for_each_in_list = typename __for_each_in_list<LIST,KERNEL,FILTER>::result;
 }
 
