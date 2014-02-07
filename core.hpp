@@ -18,59 +18,18 @@
 * along with The Turbo Library. If not, see <http://www.gnu.org/licenses/>.   *
 ******************************************************************************/
 
-#ifndef BASIC_TYPES_HPP
-#define	BASIC_TYPES_HPP
 
-#include "value_t.hpp"
+/* This header only defines the core of the library: The minimum set of dependent functionality */
 
-namespace make_type_macro
-{
-    #define MAKE_TYPE(name , type) template<type VALUE>                   \
-                                   using name = value_t<type,VALUE>; \
-                                   using name##_type = type
-}
+#ifndef CORE_HPP
+#define	CORE_HPP
 
-namespace mpl
-{
-    
-    template<typename T>
-    struct type_t
-    {
-        using type = T;
-    };
-    
-    
-    template<typename T , typename U>
-    struct pair
-    {
-        using first  = T;
-        using second = U;
-    };
-    
-    MAKE_TYPE(ucharacter         , unsigned char);
-    MAKE_TYPE(character          , char);
-    MAKE_TYPE(uinteger           , unsigned int);
-    MAKE_TYPE(integer            , int);
-    MAKE_TYPE(ulong_integer      , unsigned long int);
-    MAKE_TYPE(long_integer       , long int);
-    MAKE_TYPE(ulong_long_integer , unsigned long long int);
-    MAKE_TYPE(long_long_integer  , long long int);
-    MAKE_TYPE(boolean            , bool);
-    MAKE_TYPE(size_t             , std::size_t);
-  
-    
-    using false_type = mpl::boolean<false>;
-    using true_type  = mpl::boolean<true>;
-    
-    template<typename T>
-    struct equal_t<mpl::no_type,T> : public mpl::function<mpl::false_type> {};
-    
-    template<typename T>
-    struct equal_t<T,mpl::no_type> : public mpl::function<mpl::false_type> {};
-    
-    template<>
-    struct equal_t<mpl::no_type,mpl::no_type> : public mpl::function<mpl::true_type> {};
-}
+#include "core/value_t.hpp"
+#include "core/basic_types.hpp"
+#include "core/basic_numeric_arithmetic.hpp"
+#include "core/function.hpp"
+#include "core/boolean_predicates.hpp"
+#include "core/concepts.hpp"
 
-#endif	/* BASIC_TRAITS_HPP */
+#endif	/* CORE_HPP */
 

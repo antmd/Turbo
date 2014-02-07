@@ -18,52 +18,50 @@
 * along with The Turbo Library. If not, see <http://www.gnu.org/licenses/>.   *
 ******************************************************************************/
 
-#ifndef COLOR_HPP
-#define	COLOR_HPP
+#ifndef BASIC_TYPES_HPP
+#define	BASIC_TYPES_HPP
 
-#include "core.hpp"
-#include "to_string.hpp"
+#include "value_t.hpp"
 
-#include <sstream>
-#include <string>
-
-namespace gfx
+namespace make_type_macro
 {
-    template<char VALUE>
-    using byte = tb::value_t<char,VALUE>;
-    
-    using byte_t = unsigned char;
-    
-    template<typename R , typename G , typename B , typename A = gfx::byte<255>>
-    struct color : public tb::uinteger<((unsigned int)A::value << 24) | ((unsigned int)R::value << 16) | ((unsigned int)G::value << 8) | (unsigned int)B::value>
-    {
-        using a = A;
-        using r = R;
-        using g = G;
-        using b = B;
-    };
-    
-    template<byte_t R , byte_t G , byte_t B>
-    using from_rgb = gfx::color<gfx::byte<R>,gfx::byte<G>,gfx::byte<B>>;
-    
-    template<byte_t A , byte_t R , byte_t G , byte_t B>
-    using from_argb = gfx::color<gfx::byte<R>,gfx::byte<G>,gfx::byte<B>,gfx::byte<A>>;
+    #define MAKE_TYPE(name , type) template<type VALUE>                   \
+                                   using name = value_t<type,VALUE>; \
+                                   using name##_type = type
 }
 
-namespace trtb
-    template<typename A , typename R , typename G , typename B>
-    struct to_string_t<gfx::color<R,G,B,A>>
+namespace tb
+{
+    
+    template<typename T>
+    struct type_t
     {
-        operator std::string()
-        {
-            std::ostringstream os;
-            
-            os << "ARGB(" << (unsigned int)A::value << "," << (unsigned int)R::value << "," << (unsigned int)G::value << "," << (unsigned int)B::value << ")";
-            
-            return os.str();
-        }
+        using type = T;
     };
+    
+    
+    template<typename T , typename U>
+    struct pair
+    {
+        using first  = T;
+        using second = U;
+    };
+    
+    MAKE_TYPE(ucharacter         , unsigned char);
+    MAKE_TYPE(character          , char);
+    MAKE_TYPE(uinteger           , unsigned int);
+    MAKE_TYPE(integer            , int);
+    MAKE_TYPE(ulong_integer      , unsigned long int);
+    MAKE_TYPE(long_integer       , long int);
+    MAKE_TYPE(ulong_long_integer , unsigned long long int);
+    MAKE_TYPE(long_long_integer  , long long int);
+    MAKE_TYPE(boolean            , bool);
+    MAKE_TYPE(size_t             , std::size_t);
+  
+    
+    using false_type = tb::boolean<false>;
+    using true_type  = tb::boolean<true>;
 }
 
-#endif	/* COLOR_HPP */
+#endif	/* BASIC_TRAITS_HPP */
 
